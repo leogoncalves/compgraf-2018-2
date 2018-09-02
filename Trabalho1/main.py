@@ -97,6 +97,7 @@ def keyboard(key, x, y):
     if key == chr(27):
         sys.exit()
     
+    # Press C or c to clear screen
     if key == chr(67) or key == chr(99):
         global polygon
         polygon[:] = []
