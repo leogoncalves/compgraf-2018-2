@@ -12,7 +12,7 @@ except:
 
 # Criamos uma variável global que receberá os pontos criados
 # que serão usados para desenhar as linhas
-polygonal = [] 
+polygon = [] 
 
 width = 500 # Valor a largura da janela
 height = 500 # Valor a altura da janela
@@ -24,13 +24,13 @@ class Point:
     def __init__(self, x, y, r=1, g=1, b=1, a=1):
         # Seta a posição do ponto
         self.x = x
-        self.y = y
+        self.y = y        
         
         # Seta o valor da cor definida em rgba em rgba
-        # self.r = r 
-        # self.g = g
-        # self.b = b
-        # self.a = a
+        self.r = r 
+        self.g = g
+        self.b = b
+        self.a = a
 
     # Create line segment between two dots
     def createLineBetweenDots(self):
@@ -44,17 +44,13 @@ class Point:
 
     def sum(self, xx, yy):
         return Point(self.x + xx, self.y + yy)
-    
-# As duas funções abaixo serão utilizadas para atualizar os 
-# valores que serão usados para atualizar a posição de um ponto 
 
-def product(point, value):
-    point.x = point.x*value
-    point.y = point.y*value
+    def product(self, value):        
+        return Point(self.x * value, self.y * value)
+
+    def division(self, value):             
+        return Point(self.x / value, self.y / value)
     
-def division(point, value):
-    point.x = point.x/value
-    point.y = point.y/value
 
 # Captura a posição do mouse na janela a cada 
 # clique com o botão esquerdo. Cada clique cria
@@ -67,61 +63,72 @@ def mouse(button, state, x, y):
             xx = ((x / float(width)) - 0.5) * 2.0
             yy= (0.5 - (y / float(height))) * 2.0            
             point = Point(xx, yy)
-            polygonal.append(point)            
+            polygon.append(point)
     glutPostRedisplay()
 
-# Captura um evento do teclado. Como pedido, fazemos a suavização apertando qualquer tecla
-def keyboard(key, x, y):
-    newPolygonal = [] # Cria um novo vetor que usaremos para armazenar os pontos
+def smooth(polygon):
+    newPolygon = [] # Cria um novo vetor que usaremos para armazenar os pontos
     i = 0    
 
-    # Aqui, fazemos o seguinte: Para cada par de pontos, dividimos a reta em quatro partes
-    # e criamos novos pontos, descartando o último
-    for point in polygonal:
+    for point in polygon:
         if i == 0:
-            newPolygonal.append(point)
+            newPolygon.append(point)
             i+=1
             continue
 
-        p = point.subtract(polygonal[i-1].x, polygonal[i-1].y)
-        division(p, 4.0)        
+        p = point.subtract(polygon[i-1].x, polygon[i-1].y)
+        p = p.division(4.0)
         
-        newPolygonal.append(p.sum(polygonal[i-1].x, polygonal[i-1].y))
+        newPolygon.append(p.sum(polygon[i-1].x, polygon[i-1].y))
 
-        product(p, 3.0)
-        newPolygonal.append(p.sum(polygonal[i-1].x, polygonal[i-1].y))
+        p = p.product(3.0)
+        newPolygon.append(p.sum(polygon[i-1].x, polygon[i-1].y))
 
-        if i == len(polygonal) - 1:
-            newPolygonal.append(point)
+        if i == len(polygon) - 1:
+            newPolygon.append(point)
         i+=1
-    
-    # Atualizamos o objeto que continha os antigos 
-    # pontos com os pontos da nova curva
-    global polygonal
-    polygonal = newPolygonal
+    return newPolygon
 
-    # Redesenhamos a tela
-    glutPostRedisplay()
+
+# Captura um evento do teclado. Como pedido, fazemos 
+# a suavização apertando qualquer tecla
+
+def keyboard(key, x, y):
+    if key == chr(27):
+        sys.exit()
+    
+    if key == chr(67) or key == chr(99):
+        global polygon
+        polygon[:] = []
+        glutPostRedisplay()        
+
+    # press S key to smooth
+    if key == chr(83) or key == chr(115):
+        global polygon
+        smoothPolygon = smooth(polygon)
+        polygon = smoothPolygon
+        # Redesenhamos a tela
+        glutPostRedisplay()
 
 # Desenhamos a tela e desenhamos os pontos e retas
 def display():
     glClearColor(0.0,0.0,0.0,1.0)
     glClear(GL_COLOR_BUFFER_BIT)
     glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-    glEnable(GL_LINE_SMOOTH);
-    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glEnable(GL_LINE_SMOOTH)
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
     
     glPointSize(1.50)
     
 
     glBegin(GL_LINE_STRIP)    
-    for ponto in polygonal:
+    for ponto in polygon:
         ponto.createLineBetweenDots()    
     glEnd()
 
     glBegin(GL_POINTS)    
-    for ponto in polygonal:
+    for ponto in polygon:
         ponto.createLineBetweenDots()    
     glEnd()
 
