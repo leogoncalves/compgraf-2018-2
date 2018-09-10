@@ -1,4 +1,4 @@
-# Trabalho 1 - Suavização de curvas com PyOpenGL
+# Trabalho 2 - Ponto em polígono PyOpenGL
 
 No trabalho, usamos Python 2.7 e a biblioteca PyOpenGL
 
