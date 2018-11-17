@@ -103,18 +103,27 @@ def jarvis_convex_hull(points):
 
 def delaunay(points):
     convex_hull = jarvis_convex_hull(points)
-    queue = convex_hull[0:2]
+    queue = []
+    queue.append(convex_hull[1])
     triangle = convex_hull[0:2]
-    cos = 1
-    point = 0
     for i in range(0, len(queue), 1):
+        cos = 1
+        point = 0
         for j in range(0, len(points), 1):
             if theta(queue[i], points[j]) < cos:
                 cos = theta(queue[i], points[j])
                 point = j
+        # If edge is in convex hull
+        if points[point] in convex_hull:
+            pass
+        # If edge is in half-edge queue
+        if points[point] in queue:
+            pass
+
         triangle.append(points[point])
         queue.append(points[point])
         queue.pop(0)
+    print(len(triangle))
     return triangle
 
 # Keyboard events. Here's our controls
