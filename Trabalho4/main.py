@@ -23,10 +23,11 @@ _HEIGHT = 500
 
 class Point:
 
-    def __init__(self, x, y, r=1, g=1, b=1, a=1):
+    def __init__(self, x = 0, y = 0, z = 0, r=1, g=1, b=1, a=1):
 
         self.x = x
         self.y = y
+        self.z = z
         self.r = r
         self.g = g
         self.b = b
@@ -39,27 +40,36 @@ class Point:
 
     # Some simple arithmetic operations
 
-    def sum(self, x, y):
-        return Point(self.x + x, self.y + y)
+    def add(self, point):
+        return Point(self.x + point.x, self.y + point.y, self.z + point.z)
 
-    def subtract(self, x, y):
-        return Point(self.x - x, self.y - y)
+    def subtract(self, point):
+        return Point(self.x - point.x, self.y - point.y, self.z - point.z)
     
     def product(self, scalar):
-        return Point(self.x * scalar, self.y * scalar)
+        return Point(self.x * scalar, self.y * scalar, self.z * scalar)
 
     def division(self, scalar):
-        return Point(self.x / scalar, self.y / scalar)
+        return Point(self.x / scalar, self.y / scalar, self.z / scalar)
 
-def dot(p, q):
-    return (p.x*q.x) + (p.y*q.y)
-
-def norm(a):
-    return sqrt(pow(a.x, 2) + pow(a.y, 2))
-
-def theta(a, b):
-    return dot(a,b)/(norm(a)*norm(b))
-
+    def isEquals(self, point):
+        return (self.x == point.x) and (self.y == point.y)            
+    
+    def dot(self, point):
+      return (self.x * point.x) + (self.y * point.y) + (self.z * point.z)
+    
+    def cross(self, point):
+      x = (self.y * point.z) - (self.z * point.y)
+      y = (self.z * point.x) - (self.x * point.z)
+      z = (self.x - point.y) - (self.y * point.x)
+      return Point(x, y, z)
+    
+    def norm(self):
+      return sqrt(pow(self.x, 2) + pow(self.y, 2) + pow(self.z, 2))
+		
+    def normalize(self):
+      return self.division(self.norm())
+    
 # Define orientation
 def orientation(p, q, r):
     k = ((q.y - p.y) * (r.x - q.x)) - ((q.x - p.x) * (r.y - q.y))
@@ -101,29 +111,58 @@ def jarvis_convex_hull(points):
             break
     return hull
 
+def delTriangle(p1, p2, points):
+    v1 = p2.subtract(p1)  
+    cos = 2
+    p3 = Point()
+
+    for candidato in points:
+        if not candidato.isEquals(p1) and not candidato.isEquals(p2):            
+            v2 = candidato.subtract(p1)
+            v3 = v1.cross(v2)
+        
+            if v3.z > 0:
+                v2 = p1.subtract(candidato).normalize()
+                v3 = p2.subtract(candidato).normalize()
+                cos_candidato = v2.dot(v3)
+            
+                if cos_candidato < cos:
+                    cos = cos_candidato
+                    p3 = candidato
+    return p3
+
+def item_in_collection(item, collection):
+  return item in collection
+
+# Give edges from triangle
+def edge_destine(item):
+  return 3 * (item//3) + (item+1) % 3
+
 def delaunay(points):
     convex_hull = jarvis_convex_hull(points)
-    queue = []
-    queue.append(convex_hull[1])
     triangle = convex_hull[0:2]
-    for i in range(0, len(queue), 1):
-        cos = 1
-        point = 0
-        for j in range(0, len(points), 1):
-            if theta(queue[i], points[j]) < cos:
-                cos = theta(queue[i], points[j])
-                point = j
-        # If edge is in convex hull
-        if points[point] in convex_hull:
-            pass
-        # If edge is in half-edge queue
-        if points[point] in queue:
-            pass
+    
+    # Triangle indexes queue
+    queue = [1, 2]
 
-        triangle.append(points[point])
-        queue.append(points[point])
+    point = delTriangle(convex_hull[0], convex_hull[1], points)
+    triangle.append(point)
+    
+    # Add in queue the index of first element from delaunay triangulation 
+    for i in range(0, len(queue), 1):
+        p1 = triangle[edge_destine(queue[i])]
+        p2 = triangle[edge_destine(queue[i] + 1)]
+        point = delTriangle(p2, p1, points)
+        
+        
+
+        triangle.append(p2)
+        triangle.append(p1)
+        triangle.append(point)
+
+
         queue.pop(0)
-    print(len(triangle))
+        queue.append()
     return triangle
 
 # Keyboard events. Here's our controls
@@ -214,3 +253,7 @@ def main():
 # Call the main function
 if __name__ == '__main__':
     main()
+    
+    
+  
+
