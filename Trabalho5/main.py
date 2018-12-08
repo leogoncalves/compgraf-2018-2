@@ -33,9 +33,9 @@ class Point:
         self.a = a
 
     # Create line segment between two dots
-    def createLineBetweenDots(self):
+    def createLineBetweenDots(self, r = 1, g = 1, b = 1, a = 1):
         glColor4d(self.r, self.g, self.b, self.a)
-        glVertex2d(self.x, self.y)
+        glVertex3d(self.x, self.y, self.z)
 
     # Some simple arithmetic operations
 
@@ -117,7 +117,6 @@ def binomial(n, i):
     )
 
 def bernstein(n, i, t):
-    # print(n, i, t)
     return binomial(n, i) * (t ** i) * ((1-t) ** (n-i))
 
 def bezier(points, t):
@@ -127,18 +126,19 @@ def bezier(points, t):
         if (i != n):
             point.x += bernstein(n-1, i, t) * points[i].x
             point.y += bernstein(n-1, i, t) * points[i].y
+            point.z += bernstein(n-1, i, t) * points[i].z
     return point
 
 def f(points, t):
     x = bezier(points, t).x
     y = bezier(points, t).y
-    return Point(x, y)
+    z = bezier(points, t).z
+    return Point(x, y, z)
 
 def criaCurva(points):
     curves = []
     for i in range(0, 100):
         t = float(i)/100
-        x = f(points, t)
         curves.append(f(points, t))
     return curves
 
@@ -194,8 +194,7 @@ def mouse(button, state, x, y):
         if state == GLUT_DOWN:
             xx = ((x / float(_WIDTH)) - 0.5) * 2.0
             yy = (0.5 - (y / float(_HEIGHT))) * 2.0
-            zz = random.uniform(0.0, 1.0)
-            print(zz)
+            zz = random.uniform(-1., 1.)
             point = Point(xx, yy, zz)
             collection.append(point)
 
@@ -218,7 +217,7 @@ def display():
     glBegin(GL_POINTS)
     for point in collection:
         glColor3f(0.0, 1.0, 0.0)
-        glVertex2d(point.x, point.y)
+        glVertex3d(point.x, point.y, point.z)
     glEnd()
 
     glBegin(GL_LINE_LOOP)
