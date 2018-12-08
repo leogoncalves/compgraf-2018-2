@@ -136,8 +136,8 @@ def f(points, t):
 
 def criaCurva(points):
     curves = []
-    for i in range(0, 11):
-        t = float(i)/10
+    for i in range(0, 100):
+        t = float(i)/100
         x = f(points, t)
         curves.append(f(points, t))
     return curves
