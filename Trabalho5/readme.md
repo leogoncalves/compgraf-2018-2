@@ -1,4 +1,4 @@
-# Trabalho 3 - Bezier Curve
+# Trabalho 5 - Bezier Curve
 
 No trabalho, usamos Python 2.7 e a biblioteca PyOpenGL
 
@@ -17,4 +17,4 @@ Um passo a passo para rodar o projeto é
 
 > $ python main.py
 
-<img src="./trabalho 5.gif">
+<img src="./trabalho5.gif">
